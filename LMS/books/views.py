@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_object_or_404
 from .forms import BookForm
 from django.contrib import messages
 from .models import Book
@@ -37,3 +37,11 @@ def update_book(request, id):
     else:
         form = BookForm(instance=book)
     return render(request, 'update.html', {'form': form})
+
+def delete_book(request, pk):
+    book = get_object_or_404(Book,id=id)
+    if request.method == 'POST':
+        book.delete()
+        messages.success(request, 'Book deleted successfully!')
+        return redirect('book_list')
+    return render(request, 'delete_book.html', {'book': book})
