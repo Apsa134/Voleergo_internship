@@ -1,19 +1,21 @@
-
 {% extends 'base.html' %}
 
-{% block title %}Add Student Marks{% endblock %}
+{% block title %}Add Marks{% endblock %}
 
 {% block content %}
 
-<h2>Add Marks for {{ student.name }}</h2>
+    <h2>Add Marks for {{ student.name }}</h2>
 
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p }}
+    <form method="POST">
+        {% csrf_token %}
 
-    <button type="submit">Save Marks</button>
-</form>
+        {{ form.as_p }}
 
-<a href="{% url 'student_detail' student.id %}">Back to Student Details</a>
+        <button type="submit">Save Marks</button>
+    </form>
+
+    <a href="{% url 'student_detail' student.id %}">
+        Back to Student Details
+    </a>
 
 {% endblock %}

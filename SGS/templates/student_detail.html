@@ -5,39 +5,105 @@
 
 {% block content %}
 
-<h2>Student Details</h2>
+    <h2>Student Details</h2>
 
-<p><strong>Name:</strong> {{ student.name }}</p>
-<p><strong>Roll Number:</strong> {{ student.roll_number }}</p>
+    <p>
+        <strong>Name:</strong> {{ student.name }}
+    </p>
 
-<h3>Subject Marks</h3>
+    <p>
+        <strong>Roll Number:</strong> {{ student.roll_number }}
+    </p>
 
-<table border="1" cellpadding="10">
-    <thead>
-        <tr>
-            <th>Subject</th>
-            <th>Marks Obtained</th>
-            <th>Maximum Marks</th>
-        </tr>
-    </thead>
+    <hr>
 
-    <tbody>
-        {% for mark in marks %}
-        <tr>
-            <td>{{ mark.subject.name }}</td>
-            <td>{{ mark.marks_obtained }}</td>
-            <td>{{ mark.subject.max_marks }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3">No marks added yet.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h2>Academic Performance</h2>
 
-<a href="{% url 'add_mark' student.id %}">
-    Add Subject Marks
-</a>
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th>
+                <th>Marks Obtained</th>
+                <th>Maximum Marks</th>
+                <th>Grade</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for item in result.subject_results %}
+                <tr>
+                    <td>{{ item.subject }}</td>
+
+                    <td>
+                        {% if item.marks_obtained != None %}
+                            {{ item.marks_obtained }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item.max_marks }}</td>
+
+                    <td>{{ item.grade }}</td>
+
+                    <td>{{ item.result }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <hr>
+
+    <!-- Overall Result Card -->
+
+    <section class="result-card">
+
+        <div class="result-card-header">
+            <div>
+                <span class="result-label">PERFORMANCE SUMMARY</span>
+                <h2>Overall Result</h2>
+            </div>
+
+            <span class="result-status
+                {% if result.result == 'Pass' %}passed
+                {% elif result.result == 'Fail' %}failed
+                {% else %}pending{% endif %}">
+                {{ result.result }}
+            </span>
+        </div>
+
+        <div class="result-stats">
+
+            <div class="result-stat">
+                <span>Total Marks</span>
+                <h3>
+                    {{ result.total_obtained }}
+                    <small>/ {{ result.total_maximum }}</small>
+                </h3>
+            </div>
+
+            <div class="result-stat">
+                <span>Percentage</span>
+                <h3>
+                    {% if result.percentage != None %}
+                        {{ result.percentage }}<small>%</small>
+                    {% else %}
+                        -
+                    {% endif %}
+                </h3>
+            </div>
+
+        </div>
+
+    </section>
+
+    <a href="{% url 'add_mark' student.id %}">
+        Add Marks
+    </a>
+
+    <a href="{% url 'student_list' %}">
+        ← Back to Student List
+    </a>
 
 {% endblock %}

@@ -38,10 +38,9 @@ def update_book(request, id):
         form = BookForm(instance=book)
     return render(request, 'update.html', {'form': form})
 
-def delete_book(request, pk):
+def delete_book(request, id):
     book = get_object_or_404(Book,id=id)
-    if request.method == 'POST':
-        book.delete()
-        messages.success(request, 'Book deleted successfully!')
-        return redirect('book_list')
-    return render(request, 'delete_book.html', {'book': book})
+    book.delete()
+    messages.success(request, 'Book deleted successfully!')
+    return redirect('book_list')
+    

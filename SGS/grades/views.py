@@ -1,6 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from .forms import StudentForm,SubjectForm,StudentMarkForm
-from .models import Student,Subject,StudentMark
+from .models import Student
+from .utils import calculate_student_result
 # Create your views here.
 def home(request):
     return render(request, 'home.html')
@@ -10,7 +11,7 @@ def add_student(request):
         form = StudentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('add_student')
+            return redirect('home')
     else:
         form = StudentForm()
     return render(request, 'add_student.html', {'form': form})
@@ -20,7 +21,7 @@ def add_subject(request):
         form = SubjectForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('add_subject')
+            return redirect('home')
     else:
         form = SubjectForm()
     return render(request, 'add_subject.html', {'form': form})
@@ -34,11 +35,11 @@ def student_list(request):
 
 def student_detail(request, id):
     student = get_object_or_404(Student, id=id)
-    marks = student.marks.select_related('subject').all()
+    result = calculate_student_result(student)
 
     return render(request, 'student_detail.html', {
         'student': student,
-        'marks': marks
+        'result': result
     })
 
 
