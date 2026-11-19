@@ -1,0 +1,89 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | GradeTrack{% endblock %}
+
+{% block content %}
+
+<h1>Performance Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card"><span>Total Students</span><strong>{{ total_students }}</strong></div>
+    <div class="stat-card"><span>Class Average</span><strong>{{ class_average }}%</strong></div>
+    <div class="stat-card"><span>Passed</span><strong>{{ passed_students }}</strong></div>
+    <div class="stat-card"><span>Failed</span><strong>{{ failed_students }}</strong></div>
+    <div class="stat-card"><span>Incomplete</span><strong>{{ incomplete_students }}</strong></div>
+</div>
+<h2>Top 5 Students</h2>
+
+{% for item in top_students %}
+    <p>
+        {{ item.student.name }} -
+        {{ item.percentage }}%
+    </p>
+{% empty %}
+    <p>No completed student results available.</p>
+{% endfor %}
+
+
+<hr>
+
+<h2>Subject-wise Performance</h2>
+
+<div style="width: 100%; max-width: 750px;">
+    <canvas id="subjectChart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ subject_performance|json_script:"subject-data" }}
+
+<script>
+    const subjectData = JSON.parse(
+        document.getElementById('subject-data').textContent
+    );
+
+    const labels = subjectData.map(item => item.subject);
+    const averages = subjectData.map(item => item.average);
+
+    const ctx = document.getElementById('subjectChart');
+
+    new Chart(ctx, {
+        type: 'bar',
+
+        data: {
+            labels: labels,
+
+            datasets: [{
+                label: 'Average Performance (%)',
+                data: averages,
+                backgroundColor: '#315C4D',
+                borderRadius: 8,
+                barThickness: 35
+            }]
+        },
+
+        options: {
+            responsive: true,
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Average Percentage'
+                    }
+                }
+            },
+
+            plugins: {
+                legend: {
+                    display: true
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}
