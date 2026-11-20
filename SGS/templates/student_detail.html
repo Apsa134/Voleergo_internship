@@ -28,6 +28,7 @@
                 <th>Maximum Marks</th>
                 <th>Grade</th>
                 <th>Result</th>
+                <th>Action</th>
             </tr>
         </thead>
 
@@ -49,6 +50,26 @@
                     <td>{{ item.grade }}</td>
 
                     <td>{{ item.result }}</td>
+
+                    <td>
+                        {% if item.mark_id %}
+                            <a href="{% url 'edit_mark' student.id item.mark_id %}">
+                                Edit
+                            </a>
+
+                            |
+
+                            <a href="{% url 'delete_mark' student.id item.mark_id %}">
+                                Delete
+                            </a>
+
+                            
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    
+
                 </tr>
             {% endfor %}
         </tbody>

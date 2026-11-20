@@ -20,7 +20,14 @@ class Subject(models.Model):
         return self.name
 
 
+
 class StudentMark(models.Model):
+
+    STATUS_CHOICES = [
+        ('Present', 'Present'),
+        ('Absent', 'Absent'),
+    ]
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -32,7 +39,16 @@ class StudentMark(models.Model):
         on_delete=models.CASCADE
     )
 
-    marks_obtained = models.PositiveIntegerField()
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='Present'
+    )
+
+    marks_obtained = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
 
     class Meta:
         unique_together = ('student', 'subject')

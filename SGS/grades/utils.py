@@ -18,6 +18,7 @@ def calculate_student_result(student):
     total_maximum = 0
     failed_subjects = False
     completed_subjects = 0
+    absent_subjects = 0
 
     for subject in subjects:
 
@@ -37,12 +38,28 @@ def calculate_student_result(student):
 
         completed_subjects += 1
 
+        # Check attendance status
+        if mark.status == 'Absent':
+
+            absent_subjects += 1
+            failed_subjects = True
+
+            subject_results.append({
+                'mark_id': mark.id,
+                'subject': subject.name,
+                'marks_obtained': None,
+                'max_marks': subject.max_marks,
+                'grade': 'F',
+                'result': 'Absent - Fail'
+            })
+
+            continue
+
         obtained = mark.marks_obtained
         total_obtained += obtained
 
         percentage = (obtained / subject.max_marks) * 100
 
-        # Calculate subject grade
         if percentage >= 90:
             grade = 'A+'
         elif percentage >= 80:
@@ -58,7 +75,6 @@ def calculate_student_result(student):
         else:
             grade = 'F'
 
-        # Check subject pass/fail
         if obtained < subject.pass_marks:
             result = 'Fail'
             failed_subjects = True
@@ -66,6 +82,7 @@ def calculate_student_result(student):
             result = 'Pass'
 
         subject_results.append({
+            'mark_id': mark.id,
             'subject': subject.name,
             'marks_obtained': obtained,
             'max_marks': subject.max_marks,
@@ -74,19 +91,19 @@ def calculate_student_result(student):
         })
 
     # Calculate overall percentage
-    if total_maximum > 0:
+    if total_maximum > 0 and completed_subjects > 0:
         percentage = round(
             (total_obtained / total_maximum) * 100, 2
         )
     else:
         percentage = None
 
-    # Determine final result
-    if completed_subjects < subjects.count():
+    # Determine overall result
+    if failed_subjects:
+        final_result = 'Fail'
+    elif completed_subjects < subjects.count():
         final_result = 'Incomplete'
         percentage = None
-    elif failed_subjects:
-        final_result = 'Fail'
     else:
         final_result = 'Pass'
 

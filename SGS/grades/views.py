@@ -163,3 +163,48 @@ def add_student_mark(request, id):
         'form': form,
         'student': student
     })
+
+
+def edit_student_mark(request, student_id, mark_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    mark = get_object_or_404(
+        StudentMark,
+        id=mark_id,
+        student=student
+    )
+
+    if request.method == 'POST':
+        form = StudentMarkForm(request.POST, instance=mark)
+
+        if form.is_valid():
+            form.save()
+            return redirect('student_detail', id=student.id)
+
+    else:
+        form = StudentMarkForm(instance=mark)
+
+    return render(request, 'edit_mark.html', {
+        'form': form,
+        'student': student,
+        'mark': mark
+    })
+
+
+def delete_student_mark(request, student_id, mark_id):
+    student = get_object_or_404(Student, id=student_id)
+
+    mark = get_object_or_404(
+        StudentMark,
+        id=mark_id,
+        student=student
+    )
+
+    if request.method == 'POST':
+        mark.delete()
+        return redirect('student_detail', id=student.id)
+
+    return render(request, 'delete_mark.html', {
+        'student': student,
+        'mark': mark
+    })

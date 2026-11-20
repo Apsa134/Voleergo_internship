@@ -664,3 +664,58 @@ a { color: var(--green); }
 @media (prefers-reduced-motion: reduce) {
     * { transition: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------- Delete confirmation page ---------- */
+.main-content .warning-text {
+    max-width: 520px;
+    padding: 12px 16px;
+    border-left: 4px solid var(--red);
+    border-radius: var(--radius-sm);
+    background: var(--red-soft);
+    color: var(--red);
+    font-weight: 500;
+}
+
+.main-content .delete-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    max-width: none;
+    margin-top: 24px;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+}
+
+.main-content .delete-form button {
+    background: var(--red);
+    border-color: var(--red);
+    color: #fff;
+}
+
+.main-content .delete-form button:hover {
+    background: #8F3022;
+    border-color: #8F3022;
+}
+
+.main-content .delete-form a {
+    display: inline-block;
+    padding: 12px 22px;
+    border: 2px solid var(--green);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.main-content .delete-form a:hover {
+    background: var(--green-soft);
+}
+
+.main-content .delete-form button:focus-visible {
+    outline-color: var(--red);
+}
