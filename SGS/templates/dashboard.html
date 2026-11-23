@@ -7,25 +7,72 @@
 
 <h1>Performance Dashboard</h1>
 
+
 <div class="stats-grid">
-    <div class="stat-card"><span>Total Students</span><strong>{{ total_students }}</strong></div>
-    <div class="stat-card"><span>Class Average</span><strong>{{ class_average }}%</strong></div>
-    <div class="stat-card"><span>Passed</span><strong>{{ passed_students }}</strong></div>
-    <div class="stat-card"><span>Failed</span><strong>{{ failed_students }}</strong></div>
-    <div class="stat-card"><span>Incomplete</span><strong>{{ incomplete_students }}</strong></div>
+
+    <a href="{% url 'student_list' %}"
+       class="stat-card">
+
+        <span>Total Students</span>
+        <strong>{{ total_students }}</strong>
+
+    </a>
+
+
+    <div class="stat-card">
+        <span>Class Average</span>
+        <strong>{{ class_average }}%</strong>
+    </div>
+
+
+    <a href="{% url 'student_list' %}?result=Pass"
+       class="stat-card">
+
+        <span>Passed Students</span>
+        <strong>{{ passed_students }}</strong>
+
+    </a>
+
+
+    <a href="{% url 'student_list' %}?result=Fail"
+       class="stat-card">
+
+        <span>Failed Students</span>
+        <strong>{{ failed_students }}</strong>
+
+    </a>
+
+
+    <a href="{% url 'student_list' %}?result=Incomplete"
+       class="stat-card">
+
+        <span>Incomplete Students</span>
+        <strong>{{ incomplete_students }}</strong>
+
+    </a>
+
 </div>
+
 <h2>Top 5 Students</h2>
 
-{% for item in top_students %}
-    <p>
-        {{ item.student.name }} -
-        {{ item.percentage }}%
-    </p>
-{% empty %}
-    <p>No completed student results available.</p>
-{% endfor %}
+<div class="top-box">
+    {% for item in top_students %}
+        <div class="top-item">
+            <span class="top-rank">
+                {% if forloop.counter == 1 %}🥇
+                {% elif forloop.counter == 2 %}🥈
+                {% elif forloop.counter == 3 %}🥉
+                {% else %}{{ forloop.counter }}.{% endif %}
+            </span>
 
+            <span class="top-name">{{ item.student.name }}</span>
 
+            <span class="top-percent">{{ item.percentage }}%</span>
+        </div>
+    {% empty %}
+        <p class="top-empty">No completed student results available.</p>
+    {% endfor %}
+</div>
 <hr>
 
 <h2>Subject-wise Performance</h2>

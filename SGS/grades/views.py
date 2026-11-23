@@ -2,7 +2,8 @@ from django.shortcuts import render,redirect,get_object_or_404
 from .forms import StudentForm,SubjectForm,StudentMarkForm
 from .models import Student,Subject,StudentMark
 from .utils import calculate_student_result
-from django.db.models import Avg
+from django.db.models import Avg,Case,When,Value,F,FloatField,Q
+from django.core.paginator import Paginator
 # Create your views here.
 
 def dashboard(request):
@@ -37,6 +38,7 @@ def dashboard(request):
         class_average = 0
 
     
+
     # Calculate subject-wise average performance
     subjects = Subject.objects.all()
 
@@ -47,7 +49,13 @@ def dashboard(request):
         average_marks = StudentMark.objects.filter(
             subject=subject
         ).aggregate(
-            avg_marks=Avg('marks_obtained')
+            avg_marks=Avg(
+                Case(
+                    When(status='Absent', then=Value(0)),
+                    default=F('marks_obtained'),
+                    output_field=FloatField()
+                )
+            )
         )['avg_marks']
 
         if average_marks is not None and subject.max_marks > 0:
@@ -60,6 +68,7 @@ def dashboard(request):
                 'subject': subject.name,
                 'average': average_percentage
             })
+
 
     # Get top five students
     top_students = sorted(
@@ -86,7 +95,7 @@ def add_student(request):
         form = StudentForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('home')
+            return redirect('student_list')
     else:
         form = StudentForm()
     return render(request, 'add_student.html', {'form': form})
@@ -127,11 +136,47 @@ def add_subject(request):
         form = SubjectForm()
     return render(request, 'add_subject.html', {'form': form})
 
+
 def student_list(request):
-    students = Student.objects.all()
-    return render(request, 'student_list.html', {
-        'students': students
-    })
+
+    query = request.GET.get('search', '').strip()
+    result_filter = request.GET.get('result', '')
+
+    students = Student.objects.all().order_by('id')
+
+    # Search by student name or roll number
+    if query:
+        students = students.filter(
+            Q(name__icontains=query) |
+            Q(roll_number__icontains=query)
+        )
+    # Calculate each student's overall result
+    student_data = []
+    for student in students:
+        result = calculate_student_result(student)
+        student_data.append({
+            'student': student,
+            'result': result['result'],
+            'percentage': result['percentage']
+        })
+    # Filter by overall result
+    valid_results = ['Pass', 'Fail', 'Incomplete']
+    if result_filter in valid_results:
+        student_data = [
+            item for item in student_data
+            if item['result'] == result_filter
+        ]
+    # Pagination
+    paginator = Paginator(student_data, 5)
+    page_number = request.GET.get('page')
+    students = paginator.get_page(page_number)
+    context = {
+        'students': students,
+        'query': query,
+        'result_filter': result_filter
+    }
+
+    return render(request, 'student_list.html', context)
 
 
 def student_detail(request, id):
@@ -148,7 +193,7 @@ def add_student_mark(request, id):
     student = get_object_or_404(Student, id=id)
 
     if request.method == 'POST':
-        form = StudentMarkForm(request.POST)
+        form = StudentMarkForm(request.POST, student=student)
 
         if form.is_valid():
             mark = form.save(commit=False)
@@ -157,7 +202,7 @@ def add_student_mark(request, id):
             return redirect('student_detail', id=student.id)
 
     else:
-        form = StudentMarkForm()
+        form = StudentMarkForm(student=student)
 
     return render(request, 'add_mark.html', {
         'form': form,
@@ -175,14 +220,14 @@ def edit_student_mark(request, student_id, mark_id):
     )
 
     if request.method == 'POST':
-        form = StudentMarkForm(request.POST, instance=mark)
+        form = StudentMarkForm(request.POST, instance=mark, student=student)
 
         if form.is_valid():
             form.save()
             return redirect('student_detail', id=student.id)
 
     else:
-        form = StudentMarkForm(instance=mark)
+        form = StudentMarkForm(instance=mark, student=student)
 
     return render(request, 'edit_mark.html', {
         'form': form,
@@ -207,4 +252,38 @@ def delete_student_mark(request, student_id, mark_id):
     return render(request, 'delete_mark.html', {
         'student': student,
         'mark': mark
+    })
+
+
+def subject_list(request):
+    subjects = Subject.objects.all().order_by('name')
+
+    return render(request, 'subject_list.html', {
+        'subjects': subjects
+    })
+
+
+def edit_subject(request, id):
+    subject = get_object_or_404(Subject, id=id)
+    if request.method == 'POST':
+        form = SubjectForm(request.POST, instance=subject)
+        if form.is_valid():
+            form.save()
+            return redirect('subject_list')
+    else:
+        form = SubjectForm(instance=subject)
+    return render(request, 'edit_subject.html', {
+        'form': form,
+        'subject': subject
+    })
+
+def delete_subject(request, id):
+    subject = get_object_or_404(Subject, id=id)
+
+    if request.method == 'POST':
+        subject.delete()
+        return redirect('subject_list')
+
+    return render(request, 'delete_subject.html', {
+        'subject': subject
     })

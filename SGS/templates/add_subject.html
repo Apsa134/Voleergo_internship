@@ -1,17 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Subject{% endblock %}
+{% block title %}Add Subject | GradeTrack{% endblock %}
 
 {% block content %}
 
-    <h2>Add New Subject</h2>
+<div class="page-header">
+    <span class="page-tag">NEW SUBJECT</span>
+    <h1>Add New Subject</h1>
+    <p>Set up a subject with its maximum and pass marks so results can be calculated.</p>
+</div>
 
-    <form method="POST">
+<div class="form-layout">
+
+    <form method="POST" class="form-card">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
 
-        <button type="submit">Save Subject</button>
+        {% for field in form %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}<span class="req">*</span>{% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small class="field-help">{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button type="submit">Save Subject</button>
+            <a href="{% url 'subject_list' %}" class="cancel-link">Cancel</a>
+        </div>
     </form>
+
+    <aside class="form-aside">
+        <div class="aside-icon">📚</div>
+        <h3>Good to know</h3>
+        <ul>
+            <li>Pass marks decide whether a student passes this subject.</li>
+            <li>Maximum marks are used to calculate each student's percentage.</li>
+            <li>Deleting a subject later also removes its recorded marks.</li>
+        </ul>
+    </aside>
+
+</div>
 
 {% endblock %}

@@ -18,7 +18,7 @@ def calculate_student_result(student):
     total_maximum = 0
     failed_subjects = False
     completed_subjects = 0
-    absent_subjects = 0
+    pending_subjects = 0
 
     for subject in subjects:
 
@@ -26,28 +26,35 @@ def calculate_student_result(student):
 
         mark = marks_by_subject.get(subject.id)
 
-        if mark is None:
+        # Check whether marks are available
+        if mark is None or (
+            mark.status == 'Present' and mark.marks_obtained is None
+        ):
+            pending_subjects += 1
+
             subject_results.append({
+                'mark_id': mark.id if mark else None,
                 'subject': subject.name,
                 'marks_obtained': None,
                 'max_marks': subject.max_marks,
                 'grade': '-',
                 'result': 'Pending'
             })
+
             continue
 
         completed_subjects += 1
 
-        # Check attendance status
+        # Handle absent students
         if mark.status == 'Absent':
 
-            absent_subjects += 1
             failed_subjects = True
 
+            # Absent contributes zero marks
             subject_results.append({
                 'mark_id': mark.id,
                 'subject': subject.name,
-                'marks_obtained': None,
+                'marks_obtained': 0,
                 'max_marks': subject.max_marks,
                 'grade': 'F',
                 'result': 'Absent - Fail'
@@ -58,23 +65,31 @@ def calculate_student_result(student):
         obtained = mark.marks_obtained
         total_obtained += obtained
 
-        percentage = (obtained / subject.max_marks) * 100
+        # Calculate subject percentage safely
+        if subject.max_marks > 0:
+            subject_percentage = (
+                obtained / subject.max_marks
+            ) * 100
+        else:
+            subject_percentage = 0
 
-        if percentage >= 90:
+        # Calculate grade
+        if subject_percentage >= 90:
             grade = 'A+'
-        elif percentage >= 80:
+        elif subject_percentage >= 80:
             grade = 'A'
-        elif percentage >= 70:
+        elif subject_percentage >= 70:
             grade = 'B+'
-        elif percentage >= 60:
+        elif subject_percentage >= 60:
             grade = 'B'
-        elif percentage >= 50:
+        elif subject_percentage >= 50:
             grade = 'C+'
-        elif percentage >= 35:
+        elif subject_percentage >= 35:
             grade = 'C'
         else:
             grade = 'F'
 
+        # Check pass or fail
         if obtained < subject.pass_marks:
             result = 'Fail'
             failed_subjects = True
@@ -90,8 +105,12 @@ def calculate_student_result(student):
             'result': result
         })
 
-    # Calculate overall percentage
-    if total_maximum > 0 and completed_subjects > 0:
+    # Calculate overall percentage only when all subjects are completed
+    if (
+        total_maximum > 0
+        and pending_subjects == 0
+        and completed_subjects > 0
+    ):
         percentage = round(
             (total_obtained / total_maximum) * 100, 2
         )
@@ -99,11 +118,12 @@ def calculate_student_result(student):
         percentage = None
 
     # Determine overall result
-    if failed_subjects:
-        final_result = 'Fail'
-    elif completed_subjects < subjects.count():
+    if pending_subjects > 0 or completed_subjects == 0:
         final_result = 'Incomplete'
-        percentage = None
+
+    elif failed_subjects:
+        final_result = 'Fail'
+
     else:
         final_result = 'Pass'
 

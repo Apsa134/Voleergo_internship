@@ -9,7 +9,7 @@
 
     <title>{% block title %}GradeTrack{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=2">
 </head>
 
 <body>
@@ -26,7 +26,6 @@
 
             <div class="sidebar-section">
                 <p class="sidebar-heading">WORKSPACE</p>
-                </a>
                 <a href="{% url 'dashboard' %}" class="sidebar-link">
                     <span class="nav-icon">▦</span>
                     <span>Dashboard</span>
@@ -46,7 +45,7 @@
             <div class="sidebar-section">
                 <p class="sidebar-heading">ACADEMICS</p>
 
-                <a href="{% url 'add_subject' %}" class="sidebar-link">
+                <a href="{% url 'subject_list' %}" class="sidebar-link">
                     <span class="nav-icon">▤</span>
                     <span>Subjects</span>
                 </a>

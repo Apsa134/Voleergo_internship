@@ -1,17 +1,57 @@
 {% extends 'base.html' %}
 
-{% block title %}Add Student{% endblock %}
+{% block title %}Add Student | GradeTrack{% endblock %}
 
 {% block content %}
 
-    <h2>Add New Student</h2>
+<div class="page-header">
+    <span class="page-tag">NEW RECORD</span>
+    <h1>Add New Student</h1>
+    <p>Register a student so you can start recording marks and tracking results.</p>
+</div>
 
-    <form method="POST">
+<div class="form-layout">
+
+    <form method="POST" class="form-card">
         {% csrf_token %}
 
-        {{ form.as_p }}
+        {{ form.non_field_errors }}
 
-        <button type="submit">Save Student</button>
+        {% for field in form %}
+            <div class="form-field">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}<span class="req">*</span>{% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                    <small class="field-help">{{ field.help_text }}</small>
+                {% endif %}
+
+                {% for error in field.errors %}
+                    <small class="field-error">{{ error }}</small>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button type="submit">Save Student</button>
+            <a href="{% url 'student_list' %}" class="cancel-link">Cancel</a>
+        </div>
     </form>
+
+    <aside class="form-aside">
+        <div class="aside-icon">🎓</div>
+        <h3>What happens next?</h3>
+        <ul>
+            <li>The student appears in your Student List.</li>
+            <li>Open their details page to add subject marks.</li>
+            <li>Total, percentage and result are calculated automatically.</li>
+        </ul>
+    </aside>
+
+</div>
 
 {% endblock %}

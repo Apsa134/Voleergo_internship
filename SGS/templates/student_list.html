@@ -5,7 +5,41 @@
 
 {% block content %}
 
-    <h2>Student List</h2>
+<h2>Student List</h2>
+
+<!-- Search and Filter -->
+
+<form method="GET" id="student-search-form" class="student-controls">
+
+    <div class="search-box">
+        <input
+            type="search"
+            name="search"
+            id="search-input"
+            placeholder="Search by name or roll number..."
+            value="{{ query }}"
+        >
+
+        <button type="submit" class="search-button">
+            <span>⌕</span> Search
+        </button>
+    </div>
+
+    <select name="result" id="result-filter">
+        <option value="">All Results</option>
+        <option value="Pass" {% if result_filter == 'Pass' %}selected{% endif %}>Pass</option>
+        <option value="Fail" {% if result_filter == 'Fail' %}selected{% endif %}>Fail</option>
+        <option value="Incomplete" {% if result_filter == 'Incomplete' %}selected{% endif %}>Incomplete</option>
+    </select>
+
+    <button type="button" id="clear-search">Clear</button>
+
+</form>
+
+
+
+<!-- Student Results -->
+<div id="student-results">
 
     {% if students %}
 
@@ -15,48 +49,196 @@
                     <th>Sl. No.</th>
                     <th>Student Name</th>
                     <th>Roll Number</th>
+                    <th>Result</th>
+                    <th>Percentage</th>
                     <th>Action</th>
                 </tr>
             </thead>
 
             <tbody>
-                {% for student in students %}
+                {% for item in students %}
                     <tr>
-                        <td>{{ forloop.counter }}</td>
+                        <td>
+                            {{ students.start_index|add:forloop.counter0 }}
+                        </td>
 
-                        <td>{{ student.name }}</td>
+                        <td>{{ item.student.name }}</td>
 
-                        <td>{{ student.roll_number }}</td>
+                        <td>{{ item.student.roll_number }}</td>
+
+                        <td>{{ item.result }}</td>
 
                         <td>
-                            <a href="{% url 'student_detail' student.id %}">
+                            {% if item.percentage is not None %}
+                                {{ item.percentage }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{% url 'student_detail' item.student.id %}">
                                 View Details
                             </a>
-
                             |
-
-                            <a href="{% url 'edit_student' student.id %}">
+                            <a href="{% url 'edit_student' item.student.id %}">
                                 Edit
                             </a>
-                            
                             |
-
-                            <a href="{% url 'delete_student' student.id %}">
+                            <a href="{% url 'delete_student' item.student.id %}">
                                 Delete
                             </a>
-
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
 
+        <!-- Pagination -->
+        <div class="pagination">
+
+            {% if students.has_previous %}
+                <a data-page="1"
+                   href="?search={{ query|urlencode }}&result={{ result_filter|urlencode }}&page=1">
+                    First
+                </a>
+
+                <a data-page="{{ students.previous_page_number }}"
+                   href="?search={{ query|urlencode }}&result={{ result_filter|urlencode }}&page={{ students.previous_page_number }}">
+                    Previous
+                </a>
+            {% endif %}
+
+            <span>
+                Page {{ students.number }} of {{ students.paginator.num_pages }}
+            </span>
+
+            {% if students.has_next %}
+                <a data-page="{{ students.next_page_number }}"
+                   href="?search={{ query|urlencode }}&result={{ result_filter|urlencode }}&page={{ students.next_page_number }}">
+                    Next
+                </a>
+
+                <a data-page="{{ students.paginator.num_pages }}"
+                   href="?search={{ query|urlencode }}&result={{ result_filter|urlencode }}&page={{ students.paginator.num_pages }}">
+                    Last
+                </a>
+            {% endif %}
+
+        </div>
+
     {% else %}
 
-        <p>No students have been registered yet.</p>
+        <p>No students found.</p>
 
     {% endif %}
 
-    <a href="{% url 'add_student' %}">Add New Student</a>
+</div>
+
+<br>
+
+<a href="{% url 'add_student' %}">Add New Student</a>
+
+
+<!-- Live Search and Filtering -->
+<script>
+
+    const searchInput = document.getElementById('search-input');
+    const resultFilter = document.getElementById('result-filter');
+    const clearSearch = document.getElementById('clear-search');
+    const resultsContainer = document.getElementById('student-results');
+    const searchForm = document.getElementById('student-search-form');
+
+
+    // Fetch updated student results
+    async function loadResults(page = 1) {
+
+        const params = new URLSearchParams();
+
+        params.set('search', searchInput.value.trim());
+        params.set('result', resultFilter.value);
+        params.set('page', page);
+
+        const url = `${window.location.pathname}?${params.toString()}`;
+
+        try {
+
+            const response = await fetch(url);
+
+            const html = await response.text();
+
+            const parser = new DOMParser();
+            const documentFromResponse = parser.parseFromString(
+                html,
+                'text/html'
+            );
+
+            const updatedResults = documentFromResponse.getElementById(
+                'student-results'
+            );
+
+            if (updatedResults) {
+
+                resultsContainer.innerHTML = updatedResults.innerHTML;
+
+                // Update browser URL
+                history.replaceState(null, '', url);
+
+            }
+
+        } catch (error) {
+            console.error('Error loading students:', error);
+        }
+    }
+
+
+    // Search immediately while typing
+    searchInput.addEventListener('input', function() {
+        loadResults();
+    });
+
+
+    // Filter whenever the selected result changes
+    resultFilter.addEventListener('change', function() {
+        loadResults();
+    });
+
+
+    // Clear search and show all students
+    clearSearch.addEventListener('click', function() {
+
+        searchInput.value = '';
+        resultFilter.value = '';
+
+        loadResults();
+
+    });
+
+
+    // Handle pagination without refreshing the page
+    resultsContainer.addEventListener('click', function(event) {
+
+        const pageLink = event.target.closest('a[data-page]');
+
+        if (pageLink) {
+
+            event.preventDefault();
+
+            const page = pageLink.dataset.page;
+
+            loadResults(page);
+
+        }
+
+    });
+
+
+    // Prevent normal form submission
+    searchForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        loadResults();
+    });
+
+</script>
 
 {% endblock %}

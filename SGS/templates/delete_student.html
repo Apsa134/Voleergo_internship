@@ -11,14 +11,11 @@
     <strong>{{ student.name }}</strong>?
 </p>
 
-<p class="warning-text">This will also delete the student's associated marks.</p>
+<p class="warning-text">Warning: Deleting this subject will also delete all marks recorded for it for every student.</p>
 
-<form method="POST" class="delete-form">
+<form method="POST">
     {% csrf_token %}
-
-    <button type="submit">Yes, Delete</button>
-
-    <a href="{% url 'student_list' %}">Cancel</a>
+    <button type="submit">Confirm Delete</button>
+    <a href="{% url 'subject_list' %}">Cancel</a>
 </form>
-
 {% endblock %}

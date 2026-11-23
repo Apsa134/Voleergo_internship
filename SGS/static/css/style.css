@@ -408,8 +408,12 @@ a { color: var(--green); }
 .main-content tbody tr:last-child td { border-bottom: 0; }
 .main-content tbody tr:hover td { background: #F7FAF8; }
 
+/* Action cells: hide the "|" separators, show links as pills */
+.main-content td:has(> a) { font-size: 0; white-space: nowrap; }
+
 .main-content td a {
     display: inline-block;
+    margin-right: 6px;
     padding: 5px 14px;
     border-radius: 999px;
     background: var(--green-soft);
@@ -419,7 +423,11 @@ a { color: var(--green); }
     text-decoration: none;
 }
 
+.main-content td a:last-child { margin-right: 0; }
 .main-content td a:hover { background: var(--green); color: #fff; }
+
+.main-content td a[href*="delete"] { background: var(--red-soft); color: var(--red); }
+.main-content td a[href*="delete"]:hover { background: var(--red); color: #fff; }
 
 /* ---------- Dashboard ---------- */
 .main-content canvas { max-width: 100%; }
@@ -456,6 +464,8 @@ a { color: var(--green); }
     font-size: 32px;
     color: var(--green-deep);
 }
+
+
 
 /* ---------- Result card (student detail) ---------- */
 .result-card {
@@ -665,7 +675,109 @@ a { color: var(--green); }
     * { transition: none !important; scroll-behavior: auto !important; }
 }
 
-/* ---------- Delete confirmation page ---------- */
+/* ==========================================================
+   Added: list toolbar, pagination, delete/confirm pages
+   ========================================================== */
+
+/* Link above a table (Add Subject) */
+.main-content > a:not([class]) + table { margin-top: 24px; }
+
+/* ---------- Search + filter toolbar (student list) ---------- */
+.main-content form.student-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    max-width: none;
+    margin-bottom: 24px;
+    padding: 16px;
+}
+
+.main-content form.student-controls p { margin: 0; }
+
+.search-box {
+    display: flex;
+    flex: 1 1 320px;
+    min-width: 0;
+}
+
+.main-content form.student-controls input[type="search"] {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.main-content form input[type="search"] {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid #B9C9C1;
+    border-radius: var(--radius-md);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--text);
+}
+
+.main-content form input[type="search"]:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(49, 92, 77, 0.2);
+}
+
+.main-content form.student-controls .search-button {
+    margin: 0;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    white-space: nowrap;
+}
+
+.main-content form.student-controls select {
+    width: auto;
+    min-width: 160px;
+}
+
+.main-content form.student-controls #clear-search {
+    margin: 0;
+    background: transparent;
+    color: var(--green);
+}
+
+.main-content form.student-controls #clear-search:hover {
+    background: var(--green-soft);
+    border-color: var(--green);
+}
+
+/* ---------- Pagination ---------- */
+.pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.pagination a {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.pagination a:hover { background: var(--green-soft); }
+
+.pagination span {
+    margin: 0 8px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* ---------- Delete / confirmation pages ----------
+   Applies to any form with no visible fields (only a button
+   and a Cancel link), so every delete page is styled the same. */
 .main-content .warning-text {
     max-width: 520px;
     padding: 12px 16px;
@@ -676,7 +788,8 @@ a { color: var(--green); }
     font-weight: 500;
 }
 
-.main-content .delete-form {
+.main-content .delete-form,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -689,18 +802,27 @@ a { color: var(--green); }
     border-radius: 0;
 }
 
-.main-content .delete-form button {
+.main-content .delete-form button,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) button {
+    margin: 0;
     background: var(--red);
     border-color: var(--red);
     color: #fff;
 }
 
-.main-content .delete-form button:hover {
+.main-content .delete-form button:hover,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) button:hover {
     background: #8F3022;
     border-color: #8F3022;
 }
 
-.main-content .delete-form a {
+.main-content .delete-form button:focus-visible,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) button:focus-visible {
+    outline-color: var(--red);
+}
+
+.main-content .delete-form a,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) a {
     display: inline-block;
     padding: 12px 22px;
     border: 2px solid var(--green);
@@ -712,10 +834,180 @@ a { color: var(--green); }
     transition: background-color 0.15s ease;
 }
 
-.main-content .delete-form a:hover {
+.main-content .delete-form a:hover,
+.main-content form:not(:has(input:not([type="hidden"]), select, textarea)) a:hover {
     background: var(--green-soft);
 }
 
-.main-content .delete-form button:focus-visible {
-    outline-color: var(--red);
+/* Clickable dashboard stat cards */
+a.stat-card {
+    display: block;
+    color: inherit;
+    text-decoration: none !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+a.stat-card * {
+    text-decoration: none !important;
+}
+
+a.stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--green);
+    box-shadow: 0 8px 20px rgba(27, 53, 44, 0.1);
+}
+
+/* ---------- Top 5 students box ---------- */
+.top-box {
+    max-width: 750px;
+    padding: 8px 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.top-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.top-item:last-child { border-bottom: 0; }
+
+.top-rank {
+    flex: none;
+    width: 36px;
+    text-align: center;
+    font-family: var(--font-head);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--green);
+}
+
+.top-name {
+    flex: 1;
+    font-size: 17px;
+    font-weight: 600;
+}
+
+.top-percent {
+    font-family: var(--font-head);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green-deep);
+}
+
+.top-empty { margin: 12px 0; color: var(--muted); }
+
+/* ---------- Form pages (add / edit) ---------- */
+.page-header { max-width: 640px; margin-bottom: 28px; }
+
+.page-header h1 { margin-bottom: 8px; }
+
+.page-header p { margin: 0; color: var(--muted); }
+
+.page-tag {
+    display: inline-block;
+    margin-bottom: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--ochre-soft);
+    color: #8A5A0E;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+}
+
+.form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 24px;
+    align-items: start;
+    max-width: 920px;
+}
+
+.main-content form.form-card {
+    max-width: none;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(27, 53, 44, 0.06);
+}
+
+.form-field { margin-bottom: 22px; }
+
+.req { margin-left: 2px; color: var(--red); }
+
+.field-help {
+    display: block;
+    margin-top: 6px;
+    font-size: 13.5px;
+    color: var(--muted);
+}
+
+.field-error {
+    display: block;
+    margin-top: 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--red);
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+}
+
+.main-content form.form-card .form-actions button { margin: 0; }
+
+.cancel-link {
+    display: inline-block;
+    padding: 12px 22px;
+    border: 2px solid var(--green);
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+}
+
+.cancel-link:hover { background: var(--green-soft); }
+
+.form-aside {
+    padding: 28px;
+    border-radius: 20px;
+    background: var(--green);
+    color: #E4EEE9;
+}
+
+.aside-icon {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    place-items: center;
+    margin-bottom: 16px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 28px;
+}
+
+.main-content .form-aside h3 { color: #fff; font-size: 20px; }
+
+.form-aside ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: 15px;
+    color: #CFE0D8;
+}
+
+@media (max-width: 900px) {
+    .form-layout { grid-template-columns: 1fr; }
 }
