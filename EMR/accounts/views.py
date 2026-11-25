@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.utils import timezone
 from .serializers import RegistrationSerializer,CurrentUserSerializer,ProfileUpdateSerializer,OrganizerApplicationSerializer
 from .models import UserProfile,OrganizerApplication
+from .permissions import IsApprovedOrganizer
 
 @api_view(['POST'])
 def register(request):
@@ -137,4 +138,12 @@ def review_organizer_application(request, application_id):
         'application_id': application.id,
         'status': application.status,
         'reviewed_at': application.reviewed_at
+    })
+
+@api_view(['GET'])
+@permission_classes([IsApprovedOrganizer])
+def organizer_test(request):
+    return Response({
+        'message': 'Welcome! You have organizer access.',
+        'username': request.user.username
     })
