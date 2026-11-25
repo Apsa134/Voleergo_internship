@@ -6,7 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.utils import timezone
 from .serializers import RegistrationSerializer,CurrentUserSerializer,ProfileUpdateSerializer,OrganizerApplicationSerializer
-from .models import UserProfile,OrganizerApplication
+from .models import User,UserProfile,OrganizerApplication
 from .permissions import IsApprovedOrganizer
 
 @api_view(['POST'])
@@ -146,4 +146,62 @@ def organizer_test(request):
     return Response({
         'message': 'Welcome! You have organizer access.',
         'username': request.user.username
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def admin_user_list(request):
+    users = User.objects.all().order_by('-date_joined')
+
+    data = []
+
+    for user in users:
+        data.append({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'is_active': user.is_active,
+            'is_staff': user.is_staff,
+            'date_joined': user.date_joined
+        })
+    return Response(data)
+
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated, IsAdminUser])
+def review_organizer_application(request, application_id):
+    try:
+        application = OrganizerApplication.objects.get(
+            id=application_id
+        )
+    except OrganizerApplication.DoesNotExist:
+        return Response(
+            {'error': 'Application not found.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    new_status = request.data.get('status')
+
+    if new_status not in ['approved', 'rejected']:
+        return Response(
+            {'error': 'Status must be approved or rejected.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    if application.status != 'pending':
+        return Response(
+            {'error': 'This application has already been reviewed.'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    application.status = new_status
+    application.reviewed_at = timezone.now()
+    application.save()
+
+    return Response({
+        'message': f'Application {new_status} successfully.',
+        'application_id': application.id,
+        'status': application.status,
+        'reviewed_at': application.reviewed_at
     })

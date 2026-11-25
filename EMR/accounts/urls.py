@@ -12,5 +12,8 @@ urlpatterns = [
 	path('admin/organizer-applications/',views.all_organizer_applications,name='all_organizer_applications'),
 	path('admin/organizer-applications/<int:application_id>/review/',views.review_organizer_application,name='review_organizer_application'),
 	path('organizer/test/', views.organizer_test, name='organizer_test'),
+	path('admin/users/', views.admin_user_list, name='admin_user_list'),
+	path('admin/organizer-applications/<int:application_id>/review/',views.review_organizer_application,name='review_organizer_application'),
+
 
 ]
