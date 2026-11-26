@@ -1,13 +1,14 @@
 
-import { useState } from 'react'
+import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { AuthContext } from '../context/AuthContext'
+
 
 function Navbar() {
   const navigate = useNavigate()
 
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    !!localStorage.getItem('access')
-  )
+const { isAuthenticated, setIsAuthenticated } =
+    useContext(AuthContext)
 
   const handleLogout = () => {
     localStorage.removeItem('access')
@@ -28,8 +29,9 @@ function Navbar() {
           <>
             <Link to="/home">Home</Link>
             <Link to="/events">Events</Link>
-
-            <button onClick={handleLogout}>
+			<Link to="/my-registrations">My Registrations</Link>
+			<Link to="/profile">My Profile</Link>
+			<button onClick={handleLogout}>
               Logout
             </button>
           </>

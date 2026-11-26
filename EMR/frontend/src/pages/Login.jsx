@@ -3,8 +3,12 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import API from '../services/api'
 
+import { useContext } from 'react'
+import { AuthContext } from '../context/AuthContext'
+
 function Login() {
   const navigate = useNavigate()
+  const { setIsAuthenticated } = useContext(AuthContext)
 
   const [formData, setFormData] = useState({
     username: '',
@@ -32,6 +36,8 @@ function Login() {
 
       localStorage.setItem('access', response.data.access)
       localStorage.setItem('refresh', response.data.refresh)
+
+	  setIsAuthenticated(true)
 
       navigate('/home')
     } catch (err) {
