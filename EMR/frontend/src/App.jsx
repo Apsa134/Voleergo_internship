@@ -9,7 +9,12 @@ import ProtectedRoute from './components/ProtectedRoute'
 import EventDetails from './pages/EventDetails'
 import MyRegistrations from './pages/MyRegistrations'
 import Profile from './pages/Profile'
-
+import OrganizerApplication from './pages/OrganizerApplication'
+import OrganizerDashboard from './pages/OrganizerDashboard'
+import CreateEvent from './pages/createEvent'
+import EditEvent from './pages/EditEvent'
+import EventParticipants from './pages/EventParticipants'
+import AdminDashboard from './pages/AdminDashboard'
 
 
 function App() {
@@ -25,9 +30,15 @@ function App() {
         <Route path="/events/:eventId" element={<EventDetails />} />
         <Route path="/my-registrations" element={<MyRegistrations />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/organizer-application"element={<OrganizerApplication />}/>
+        <Route path="/organizer-dashboard"element={<OrganizerDashboard />}/>
+       <Route path="/create-event" element={<CreateEvent />} />
+       <Route path="/edit-event/:eventId" element={<EditEvent />} />
+       <Route path="/organizer/events/:eventId/participants"element={<EventParticipants />}/>
+       <Route path="/admin-dashboard" element={<AdminDashboard />} />
       </Route>
     </Routes>
-  )
+  ) 
 }
 
 export default App

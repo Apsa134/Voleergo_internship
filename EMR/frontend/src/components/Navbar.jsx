@@ -31,6 +31,7 @@ const { isAuthenticated, setIsAuthenticated } =
             <Link to="/events">Events</Link>
 			<Link to="/my-registrations">My Registrations</Link>
 			<Link to="/profile">My Profile</Link>
+			<Link to="/organizer-application">Organizer</Link>
 			<button onClick={handleLogout}>
               Logout
             </button>
